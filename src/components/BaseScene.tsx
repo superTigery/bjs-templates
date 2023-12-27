@@ -182,18 +182,26 @@ const onSceneReady = (scene: Scene) => {
   SceneLoader.ImportMeshAsync("", "models/", "wind.glb", scene).then((gltf) => {
     // meshes[1].material = mat;
 
+    const mat = new StandardMaterial("mat", scene);
+
     const meshes = gltf.meshes;
-    const texture = (meshes[1]!.material as PBRMaterial)!.albedoTexture!;
-    texture.hasAlpha = true;
-    (meshes[1]!.material as PBRMaterial).alphaMode = Engine.ALPHA_COMBINE;
+    const diffuseTexture = new Texture("textures/wind.png", scene);
+    diffuseTexture.hasAlpha = true;
+    mat.diffuseTexture = diffuseTexture;
+
+    const opacityTexture = new Texture("textures/test_mask.png", scene);
+    mat.opacityTexture = opacityTexture;
+
+    mat.useAlphaFromDiffuseTexture = true;
+    mat.disableLighting = true;
+    mat.emissiveColor = Color3.White();
+
+    meshes[1].material = mat;
 
     function windUVAnimation() {
-      texture.vOffset -= 0.015;
+      diffuseTexture.vOffset -= 0.015;
     }
-
-    if (meshes) {
-      scene.onBeforeRenderObservable.add(windUVAnimation);
-    }
+    scene.onBeforeRenderObservable.add(windUVAnimation);
   });
 };
 
