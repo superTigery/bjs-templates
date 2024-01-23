@@ -1,35 +1,24 @@
 import {
   ArcRotateCamera,
   HemisphericLight,
-  MeshBuilder,
   Scene,
   StandardMaterial,
   Texture,
   Vector3,
-  Vector4,
-  Animation,
-  IAnimationKey,
   SceneLoader,
-  Axis,
-  Space,
-  Tools,
-  CubeTexture,
   Color3,
-  SpriteManager,
-  Sprite,
-  Mesh,
-  ParticleSystem,
-  Color4,
-  PointerEventTypes,
-  AbstractMesh,
-  Material,
+  Engine,
+  MeshBuilder,
+  GlowLayer,
   PBRMaterial,
-  BaseTexture,
-  Engine
+  DynamicTexture
 } from "@babylonjs/core";
+
+import "@babylonjs/loaders";
+import { AdvancedDynamicTexture, Button } from "@babylonjs/gui";
+
 import SceneComponent from "./SceneComponent";
 import earcut from "earcut";
-import "@babylonjs/loaders";
 
 const onSceneReady = (scene: Scene) => {
   const canvas = scene.getEngine().getRenderingCanvas();
@@ -37,6 +26,31 @@ const onSceneReady = (scene: Scene) => {
   const camera = new ArcRotateCamera("camera", -Math.PI / 2, Math.PI / 2.5, 30, new Vector3(0, 0, 0));
   camera.attachControl(canvas, true);
   const light = new HemisphericLight("light", new Vector3(1, 1, 0));
+  light.intensity = 0.8;
+
+  const gl = new GlowLayer("glow");
+  gl.intensity = 0.2;
+
+  const cy = MeshBuilder.CreateCylinder("cylinder", { height: 0.2 });
+  cy.position.y = 2;
+  cy.visibility = 0.5;
+
+  const cyMat = new StandardMaterial("cyMat");
+  cyMat.emissiveColor = Color3.White();
+  cy.material = cyMat;
+
+  const ground = MeshBuilder.CreateGround("ground", { width: 2, height: 2 });
+  const groundMat = new PBRMaterial("groundMat");
+
+  groundMat.opacityTexture = new Texture("textures/1.png");
+  groundMat.emissiveColor = Color3.White();
+  groundMat.emissiveIntensity = 0.3;
+
+  ground.material = groundMat;
+
+  scene.onBeforeRenderObservable.add(() => {
+    ground.rotation.y += 0.005;
+  });
 
   //Create Village ground
   // const groundMat = new StandardMaterial("groundMat");
@@ -73,7 +87,7 @@ const onSceneReady = (scene: Scene) => {
   // skybox.material = skyboxMaterial;
 
   // // SceneLoader.ImportMeshAsync("him", "https://playground.babylonjs.com/scenes/Dude/", "Dude.babylon", scene).then((result) => {
-  // //   var dude = result.meshes[0];
+  // //   const dude = result.meshes[0];
   // //   dude.scaling = new Vector3(0.25, 0.25, 0.25);
 
   // //   scene.beginAnimation(result.skeletons[0], 0, 100, true, 1.0);
@@ -205,6 +219,121 @@ const onSceneReady = (scene: Scene) => {
       diffuseTexture.vOffset -= 0.01;
     });
   });
+
+  // createInfoboard(scene);
+  test(scene);
+};
+
+const createInfoboard = (scene: Scene) => {
+  const plane = MeshBuilder.CreatePlane("infoboard", { sideOrientation: 2, width: 10, height: 5 });
+  plane.position.z = -1;
+
+  const textureResolution = 890;
+  const dyTexture = new DynamicTexture(
+    "dynamicTexture",
+    {
+      innerWidth: textureResolution,
+      innerHeight: 516
+    },
+    scene
+  );
+  const textureContext = dyTexture.getContext();
+
+  const material = new StandardMaterial("mat", scene);
+  material.diffuseTexture = dyTexture;
+  plane.material = material;
+
+  const img = new Image();
+  img.src = "textures/3.png";
+  img.onload = function () {
+    textureContext.drawImage(this, 0, 0);
+    dyTexture.update();
+  };
+};
+
+const test = (scene: Scene) => {
+  const groundWidth = 20;
+  const groundHeight = 10;
+
+  const ground = MeshBuilder.CreatePlane("ground1", { width: groundWidth, height: groundHeight, sideOrientation: 2 }, scene);
+  ground.position.z = -2;
+
+  //Create dynamic texture
+  const textureGround = new DynamicTexture(
+    "dynamic texture",
+    {
+      width: 890,
+      height: 516
+    },
+    scene
+  );
+  const textureContext = textureGround.getContext();
+
+  const materialGround = new StandardMaterial("Mat", scene);
+  materialGround.emissiveTexture = textureGround;
+  materialGround.emissiveColor = new Color3(1, 0, 0);
+  ground.material = materialGround;
+
+  const img = new Image();
+  img.src = "textures/3.png";
+  img.onload = function () {
+    //Add image to dynamic texture
+    textureContext.drawImage(this, 0, 0);
+    textureGround.update();
+
+    //Draw on canvas
+    textureContext.beginPath();
+    textureContext.fillRect(120, 200, 16, 16);
+    textureContext.fillStyle = "white";
+    textureContext.fill();
+    textureContext.closePath();
+    textureGround.update();
+
+    //Add text to dynamic texture
+    const font = "bold 20px monospace";
+    textureGround.drawText("车门已打开", 140, 216, font, "green", null, true, true);
+    textureContext.fill();
+
+    textureContext.beginPath();
+    textureContext.fillRect(120, 240, 16, 16);
+    textureContext.fillStyle = "white";
+    textureContext.fill();
+    textureGround.update();
+
+    textureGround.drawText("车锁已打开", 140, 256, font, "green", null, true, true);
+    textureContext.fill();
+
+    textureContext.beginPath();
+    textureContext.fillRect(120, 280, 16, 16);
+    textureContext.fillStyle = "white";
+    textureContext.fill();
+    textureGround.update();
+
+    textureGround.drawText("天窗已打开", 140, 296, font, "green", null, true, true);
+    textureContext.fill();
+
+    textureGround.drawText("重庆市渝北区金山大道仙桃数据谷", 540, 280, font, "green", null, true, true);
+
+    // GUI
+    const plane = MeshBuilder.CreatePlane("plane", { width: 1, height: 0.5, sideOrientation: 2 });
+    plane.parent = ground;
+    plane.position.z = -0.001;
+    plane.position.x = -5.5;
+    plane.position.y = -1.5;
+
+    const advancedTexture = AdvancedDynamicTexture.CreateForMesh(plane as any);
+
+    const button = Button.CreateSimpleButton("but1", "Click Me");
+    button.width = 1;
+    button.height = 0.4;
+    button.color = "white";
+    button.fontSize = 50;
+    button.background = "green";
+    button.onPointerUpObservable.add(() => {
+      console.log("你是最棒的");
+    });
+    advancedTexture.addControl(button);
+  };
 };
 
 const onRender = (scene: Scene) => {};

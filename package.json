@@ -10,13 +10,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@babylonjs/core": "^6.33.1",
-    "@babylonjs/loaders": "^6.33.1",
+    "@babylonjs/core": "^6.39.0",
+    "@babylonjs/gui": "^6.39.0",
     "earcut": "^2.2.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
+    "@babylonjs/loaders": "^6.39.0",
     "@types/earcut": "^2.1.4",
     "@types/react": "^18.2.37",
     "@types/react-dom": "^18.2.15",

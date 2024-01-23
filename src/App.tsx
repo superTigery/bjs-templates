@@ -1,8 +1,9 @@
-import BaseScene from "./components/BaseScene";
+// import BaseScene from "./components/BaseScene";
+import CarControl from "./components/CarControl";
 import "./App.css";
 
 function App() {
-  return <BaseScene />;
+  return <CarControl />;
 }
 
 export default App;
