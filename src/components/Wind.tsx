@@ -212,6 +212,7 @@ const onSceneReady = (scene: Scene) => {
     mat.alpha = 0.5;
 
     if (meshes.length > 1) {
+      meshes[1].visibility = 0.9999;
       meshes[1].material = mat;
     }
 

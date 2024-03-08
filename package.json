@@ -13,8 +13,10 @@
     "@babylonjs/core": "^6.39.0",
     "@babylonjs/gui": "^6.39.0",
     "earcut": "^2.2.4",
+    "node-sass": "^9.0.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "sass-loader": "^14.1.0"
   },
   "devDependencies": {
     "@babylonjs/loaders": "^6.39.0",
